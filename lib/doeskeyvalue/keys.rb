@@ -10,10 +10,8 @@ module DoesKeyValue
       puts "DOES_KEY_VALYE: Key declared: #{key_value_column}, #{key_name}, #{opts.inspect}"
       raise DoesKeyValue::NoColumnNameSpecified unless key_value_column
       raise DoesKeyValue::NoKeyNameSpecified unless key_name
-      
-      # self.send("document_fields").send("<<", field_name)
-      # self.send("#{column_name}_fields").send("<<", field_name)
-
+      raise DoesKeyValue::KeyAndIndexOptionsMustBeHash unless opts.is_a?(Hash)
+    
       # Define accessors for the key column in the AR class:
       class_eval <<-EOS
         def #{key_name}
@@ -21,7 +19,7 @@ module DoesKeyValue
           return (self.send(:#{key_value_column}) || Hash.new)[:#{key_name}]
         end
         puts "DOES_KEY_VALUE: Key accessor `#{key_name}` declared"
-        
+      
         def #{key_name}=(value)
           puts "DOES_KEY_VALUE: Setter for `#{key_name}` invoked"
           key_set = self.send(:#{key_value_column}) || Hash.new
@@ -30,9 +28,13 @@ module DoesKeyValue
         end
         puts "DOES_KEY_VALUE: Key manipulator `#{key_name}=` declared"
       EOS
-      
-    end
     
+      # Check for opts[:index=>true] and if present, call declare_index
+      if opts[:index] == true
+        declare_index(key_value_column, key_name)   # TODO: Provide mechanism for passing index options
+      end
+    
+    end
         
   end # Keys
 end # DoesKeyValue

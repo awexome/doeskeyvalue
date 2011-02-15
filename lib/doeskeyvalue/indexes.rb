@@ -7,9 +7,10 @@
 module DoesKeyValue
   module Indexes
     
-    def declare_index(key_value_column, key_name)
+    def declare_index(key_value_column, key_name, opts={})
       raise DoesKeyValue::NoColumnNameSpecified unless key_value_column
       raise DoesKeyValue::NoKeyNameSpecified unless key_name
+      raise DoesKeyValue::KeyAndIndexOptionsMustBeHash unless opts.is_a?(Hash)
       
       search_key = "#{key_value_column}.#{key_name}"
       ## TODO: raise DoesKeyValue::NoKeyForThatIndex unless self.send("#{key_value_column}_keys").include?(key_name)
