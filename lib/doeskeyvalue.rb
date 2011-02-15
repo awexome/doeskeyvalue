@@ -47,7 +47,6 @@ module ActiveRecord
     # Call this method within your class to establish key-value behavior and prep
     # the internal structure that will hold the blob
     def self.doeskeyvalue(column, opts={})
-      puts "DOES_KEY_VALUE: Turned on for AR Column:#{column}"
       self.instance_eval do
         extend DoesKeyValue::Keys
         extend DoesKeyValue::Indexes
@@ -64,18 +63,15 @@ module ActiveRecord
       
       instance_eval <<-EOS
         def #{@@key_value_column}_key(key_name, opts={})
-          puts "DOES_KEY_VALUE: Inside defined method #{@@key_value_column}_key"
           key_name = key_name.to_sym
           declare_key(@@key_value_column, key_name, opts)
         end
         
         def #{@@key_value_column}_index(key_name, opts={})
-          puts "DOES_KEY_VALUE: Inside defined method #{@@key_value_column}_index"
           key_name = key_name.to_sym
           declare_index(@@key_value_column, key_name, opts)
         end
       EOS
-      puts "DOES_KEY_VALUE: key and index methods declared"
     end
     
     

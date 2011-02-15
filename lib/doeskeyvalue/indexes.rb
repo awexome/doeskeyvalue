@@ -8,7 +8,6 @@ module DoesKeyValue
   module Indexes
     
     def declare_index(key_value_column, key_name, opts={})
-      puts "DOES_KEY_VALUE: Index declared: #{key_value_column}, #{key_name}, #{opts.inspect}"
       raise DoesKeyValue::NoColumnNameSpecified unless key_value_column
       raise DoesKeyValue::NoKeyNameSpecified unless key_name
       raise DoesKeyValue::KeyAndIndexOptionsMustBeHash unless opts.is_a?(Hash)
