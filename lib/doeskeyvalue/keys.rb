@@ -7,7 +7,7 @@ module DoesKeyValue
   module Keys
     
     def declare_key(key_value_column, key_name, opts={})
-      puts "DOES_KEY_VALYE: Key declared: #{key_value_column}, #{key_name}, #{opts.inspect}"
+      puts "DOES_KEY_VALUE: Key declared: #{key_value_column}, #{key_name}, #{opts.inspect}"
       raise DoesKeyValue::NoColumnNameSpecified unless key_value_column
       raise DoesKeyValue::NoKeyNameSpecified unless key_name
       raise DoesKeyValue::KeyAndIndexOptionsMustBeHash unless opts.is_a?(Hash)

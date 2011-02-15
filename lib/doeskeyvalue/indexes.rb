@@ -8,6 +8,7 @@ module DoesKeyValue
   module Indexes
     
     def declare_index(key_value_column, key_name, opts={})
+      puts "DOES_KEY_VALUE: Index declared: #{key_value_column}, #{key_name}, #{opts.inspect}"
       raise DoesKeyValue::NoColumnNameSpecified unless key_value_column
       raise DoesKeyValue::NoKeyNameSpecified unless key_name
       raise DoesKeyValue::KeyAndIndexOptionsMustBeHash unless opts.is_a?(Hash)
@@ -17,11 +18,9 @@ module DoesKeyValue
       
       class_name = self.name.underscore
       class_table_name = self.table_name
-      index_table_name = "key_value_indexes"
+      @@index_table_name = "key_value_indexes"
+      cattr_accessor :index_table_name
       
-      # self.send("document_indexes").send("<<", field_name)
-      # self.send("#{column_name}_indexes").send("<<", field_name)
-
       # INDEX TABLE: key_value_indexes
       #  id:int
       #  type:string
@@ -70,16 +69,16 @@ module DoesKeyValue
       after_save "update_index_#{key_value_column}_#{key_name}_after_save"
       
       # Provide a callback after destroy to likewise update the index
-      define_method("update_index_#{column_name}_#{field_name}_after_destroy") do
+      define_method("update_index_#{key_value_column}_#{key_name}_after_destroy") do
         class_name = self.class.name.underscore
         class_table_name = self.class.table_name
         index_table_name = "key_value_indexes"
         num_del = ActiveRecord::Base.connection.delete("DELETE FROM `#{index_table_name}` WHERE `obj_id` = #{self.id}")
       end
-      after_destroy "update_index_#{column_name}_#{field_name}_after_destroy"
+      after_destroy "update_index_#{key_value_column}_#{key_name}_after_destroy"
       
     end
-    
+        
     
   end # Index
 end # DoesKeyValue

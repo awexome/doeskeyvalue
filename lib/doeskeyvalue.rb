@@ -23,16 +23,19 @@ module DoesKeyValue
   
   # Exception Types for DoesKeyValue
   class NoColumnNameSpecified < Exception
-    def initialize(msg="A document column name must be provided to build a document_field."); super(msg); end
+    def initialize(msg="A class column name must be provided for storing key values in blob"); super(msg); end
   end
   class NoKeyNameSpecified < Exception
-    def initialize(msg="A document field name must be provided to build a document_field"); super(msg); end
+    def initialize(msg="A key name must be provided to build a DoesKeyValue key"); super(msg); end
   end
   class NoKeyForThatIndex < Exception
-    def initialize(msg="A document field must exist before an index can be applied to it"); super(msg); end
+    def initialize(msg="A key must exist before an index can be applied to it"); super(msg); end
   end
   class KeyAndIndexOptionsMustBeHash < Exception
     def initialize(msg="Options passed to declarations of keys and indexes must of class Hash"); super(msg); end
+  end
+  class KeyValueIndexTableDoesNotExist < Exception
+    def initialize(msg="DoesKeyValue requires an index table be generated to use key indexes. Use generator to generate migration"); super(msg); end
   end
   
 end # DoesKeyValue
