@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{doeskeyvalue}
-  s.version = "0.0.1"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Awexome Labs"]
@@ -19,14 +19,18 @@ Gem::Specification.new do |s|
   s.files = [
     ".document",
     "Gemfile",
+    "Gemfile.lock",
     "LICENSE.txt",
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "doeskeyvalue.gemspec",
     "lib/doeskeyvalue.rb",
     "lib/doeskeyvalue/indexes.rb",
     "lib/doeskeyvalue/keys.rb",
-    "lib/doeskeyvalue/util.rb"
+    "lib/doeskeyvalue/util.rb",
+    "lib/generators/doeskeyvalue/doeskeyvalue_generator.rb",
+    "lib/generators/doeskeyvalue/templates/create_key_value_index.rb"
   ]
   s.homepage = %q{http://github.com/awexome/doeskeyvalue}
   s.licenses = ["MIT"]
