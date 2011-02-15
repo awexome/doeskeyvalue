@@ -7,6 +7,7 @@ require 'active_record'
 
 require 'doeskeyvalue/keys'
 require 'doeskeyvalue/indexes'
+require 'doeskeyvalue/util'
 
 
 module DoesKeyValue
@@ -40,31 +41,40 @@ module ActiveRecord
     # Call this method within your class to establish key-value behavior and prep
     # the internal structure that will hold the blob
     def self.doeskeyvalue(column, opts={})
+      puts "DOES_KEY_VALUE: Turned on for AR Column:#{column}"
       self.instance_eval do
         include DoesKeyValue::Keys
         include DoesKeyValue::Indexes
-        
-        Array.class_eval do
-          include DoesKeyValue::Util::CondArray
-        end
         
         # Identify the AR text column holding our data and serialize it:
         @@key_value_column = column.to_sym
         cattr_accessor :key_value_column
         serialize @@key_value_column, Hash
-        
-        # Create a convenience method allowing declaration of internal keys by using
-        # the AR column passed to this builder:
-        instance_eval <<-EOS
-          def #{@@key_value_column}_key(*args)
-            # TODO: Allow passing :index=>true to key declaration
-            self.declare_key(*args.unshift(:#{@@key_value_column}))
-          end
-          def #{@@key_value_column}_index(*args)
-            self.declare_index(*args.unshift(:#{@@key_value_column}))
-          end
-        EOS
       end
+      
+      Array.class_eval do
+        include DoesKeyValue::Util::CondArray
+      end
+      
+      define_method("#{@@key_value_column}_key") do |key_name|
+        puts "DOES_KEY_VALUE: Inside defined method #{@@key_value_column}_key"
+        key_name = key_name.to_sym
+        declare_key(@@key_value_column, key_name)
+      end
+      
+      instance_eval <<-EOS
+        # def #{@@key_value_column}_key(*args)
+        #   # TODO: Allow passing :index=>true to key declaration
+        #   puts "DOES_KEY_VALUE: Declaring a key from custom method"
+        #   declare_key(*args.unshift(:#{@@key_value_column}))
+        # end
+        def #{@@key_value_column}_index(*args)
+          puts "DOES_KEY_VALUE: Declaring an index from custom method"
+          declare_index(*args.unshift(:#{@@key_value_column}))
+        end
+      EOS
+        
+      puts "DOES_KEY_VALUE: key and index methods declared"
     end
     
     
