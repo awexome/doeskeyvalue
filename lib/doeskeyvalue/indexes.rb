@@ -13,7 +13,7 @@ module DoesKeyValue
       raise DoesKeyValue::KeyAndIndexOptionsMustBeHash unless opts.is_a?(Hash)
       
       search_key = "#{key_value_column}.#{key_name}"
-      raise DoesKeyValue::NoKeyForThatIndex if !self.respond_to?(key_name) || !self.respond_to?("#{key_name}=")
+      # TODO: raise DoesKeyValue::NoKeyForThatIndex if !self.respond_to?(key_name) || !self.respond_to?("#{key_name}=")
       
       class_name = self.name.underscore
       class_table_name = self.table_name
@@ -61,9 +61,28 @@ module DoesKeyValue
       define_method("update_index_#{key_value_column}_#{key_name}_after_save") do
         class_name = self.class.name.underscore
         class_table_name = self.class.table_name
-        index_table_name = "key_value_indexes"
+        index_table_name = "key_value_index"
+
         # TODO: Restrict value to 255 characters, the table-enforced limit
-        idx_id = ActiveRecord::Base.connection.insert("INSERT INTO `#{index_table_name}` (`obj_type`,`obj_id`,`key_name`,`value`) VALUES (\""+self.class.to_s+"\","+self.id.to_s+", \""+search_key.to_s+"\", \"#{self.send(key_name).to_s}\")")
+        
+        # TODO: Serialize value in such a nils to be properly represented
+        #  Sample JSON Serialization: tab.to_json
+        #  Sample JSON Reconstruction: Tab.new( JSON.parse(tab.to_json)["tab"] )
+        
+        # TODO: Prepare create and update times as we don't get auto-touches outside an AR table
+        
+        new_value = self.send(key_name)
+        up_count = ActiveRecord::Base.connection.update("
+          UPDATE `#{index_table_name}` SET `value`=\"#{new_value}\"
+          WHERE `obj_type`=\"#{self.class}\" AND `obj_id`=#{self.id} AND `key_name`=\"#{search_key}\"
+        ")
+        if !new_value.nil? && up_count == 0
+          idx_id = ActiveRecord::Base.connection.insert(
+            "INSERT INTO `#{index_table_name}` (`obj_type`,`obj_id`,`key_name`,`value`) VALUES (\"#{self.class}\", #{self.id}, \"#{search_key}\", \"#{new_value}\")
+          ")
+          return idx_id
+        end
+        
       end
       after_save "update_index_#{key_value_column}_#{key_name}_after_save"
       
@@ -71,7 +90,7 @@ module DoesKeyValue
       define_method("update_index_#{key_value_column}_#{key_name}_after_destroy") do
         class_name = self.class.name.underscore
         class_table_name = self.class.table_name
-        index_table_name = "key_value_indexes"
+        index_table_name = "key_value_index"
         num_del = ActiveRecord::Base.connection.delete("DELETE FROM `#{index_table_name}` WHERE `obj_type` = \"#{self.class}\" AND `obj_id` = #{self.id}")
       end
       after_destroy "update_index_#{key_value_column}_#{key_name}_after_destroy"

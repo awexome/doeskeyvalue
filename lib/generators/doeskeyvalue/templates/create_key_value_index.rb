@@ -6,17 +6,11 @@
 class CreateKeyValueIndex < ActiveRecord::Migration
   def self.up
     create_table :key_value_index do |t|
-      # The key is a composite of the grouping and key name (e.g., "settings.user_id")
-      t.string :key_name
-      
-      # The stored value is saved as varchar(255), which limits indexability slightly:
-      t.string :value
-      
-      # Store details about the target object:
       t.string :obj_type
+      t.string :key_name
+      t.string :value
       t.integer :obj_id
       
-      # Track all touches:
       t.timestamps
     end
     
