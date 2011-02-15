@@ -1,8 +1,88 @@
-= doeskeyvalue
+= DoesKeyValue
 
-Description goes here.
+Bring the fun of NoSQL into your SQL-backed Active Record objects in a compartmentalized way. Turns 
+any text field on your objects into a schema-less key value store.
 
-== Contributing to doeskeyvalue
+
+== Installation
+
+Do the usual, of course:
+
+  gem install doeskeyvalue
+
+And add a gem dependency to your Gemfile:
+
+  gem "doeskeyvalue", ">=0.0.1"
+
+
+== Example (TODO: Update this with new API)
+
+To add document_fields to your ActiveRecord object, first add a text column to your class' backing table that will hold your document content. By default, do_document_fields will expect this column to be named "document", but you can override that easily.
+
+Once you've migrated that change into your model, here's a sample of hold to add document-style blob fields to your object:
+
+  class ObjectWithBlob < ActiveRecord::Base
+
+    # Declare that we are using document blobs in a particular column of this object:
+    do_document_fields
+
+    # Declare the columns we are adding to our document:
+    document_field :name, String
+    document_field :phone, String
+    document_field :age, Integer
+
+    # Declare the document fields you'd like to track with indexes:
+    document_index :name
+
+
+    # If we wanted to change the name of the column in which we store the document, we'd do this:
+    # do_document_fields :something_other_than_document. Like so:
+    
+    do_document_fields :settings
+    
+    # Changing the name of the column gives you a specifically-formatted field-definition method:
+    
+    settings_field :age
+    settings_field :sex
+    settings_field :location
+    
+    # This also provides a customized way to index:
+    
+    settings_index :location
+
+  end
+
+
+Now, you can add and remove new fields to this object within the document as simply as adding or removing declarations of "document_field".
+
+
+Once you've added any indices to your model's fields, you'll want to be sure to build your supporting index tables. We use separate tables with database-level indexing to support indexed lookups of data in your document_field attributes. Build these tables by running this rake task:
+
+  rake db:migrate:document_indexes
+
+
+Now, you can use strictly-provided finders to find your objects by their document field attributes. Considering the model we described above, you can lookup by any *indexed* field like so:
+
+  obj = ObjectWithBlob.find_by_name("Charlie")
+  => [#<ObjectWithBlob id: 412, document: {:name=>"Charlie", :phone=>"212-555-1234", :age=>34}, created_at: "2010-03-22 20:49:03", updated_at: "2010-03-22 20:49:03">]
+
+Finders are only added to document fields that are indexed. Finders also are all "find_all" lookups on equality.
+
+If you'd like to use special sub-searching within any of your document-formatted fields, you can use the hash-based search conditions. Given the "settings" document declared in the example above, we can now also do this:
+
+  obj = ObjectWithBlob.find_with_settings(:location=>"San Francisco, CA")
+  => [#<ObjectWithBlob id: 412, settings: {:age=>32, :sex=>"Female", :location=>"San Francisco, CA"}, created_at: "2010-03-22 20:49:03", updated_at: "2010-03-22 20:49:03">]
+
+It's simple.
+
+
+== Prior Versions
+
+DoesKeyValue is a much newer and cleaner version of the old "do_document_fields" plugin for prior versions
+of Rails. Check that out at http://github.com/mccolin/do_document_fields
+
+
+== Contributions
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
@@ -14,6 +94,5 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2011 Colin McCloskey. See LICENSE.txt for
-further details.
+Copyright (c) 2011 Awexome Labs, LLC. http://awexomelabs.com/
 
