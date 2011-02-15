@@ -69,16 +69,14 @@ module DoesKeyValue
         #  Sample JSON Serialization: tab.to_json
         #  Sample JSON Reconstruction: Tab.new( JSON.parse(tab.to_json)["tab"] )
         
-        # TODO: Prepare create and update times as we don't get auto-touches outside an AR table
-        
         new_value = self.send(key_name)
         up_count = ActiveRecord::Base.connection.update("
-          UPDATE `#{index_table_name}` SET `value`=\"#{new_value}\"
+          UPDATE `#{index_table_name}` SET `value` = \"#{new_value}\", `updated_at` = NOW()
           WHERE `obj_type`=\"#{self.class}\" AND `obj_id`=#{self.id} AND `key_name`=\"#{search_key}\"
         ")
         if !new_value.nil? && up_count == 0
           idx_id = ActiveRecord::Base.connection.insert(
-            "INSERT INTO `#{index_table_name}` (`obj_type`,`obj_id`,`key_name`,`value`) VALUES (\"#{self.class}\", #{self.id}, \"#{search_key}\", \"#{new_value}\")
+            "INSERT INTO `#{index_table_name}` (`obj_type`,`obj_id`,`key_name`,`value`,`created_at`,`updated_at`) VALUES (\"#{self.class}\", #{self.id}, \"#{search_key}\", \"#{new_value}\", NOW(), NOW())
           ")
           return idx_id
         end
