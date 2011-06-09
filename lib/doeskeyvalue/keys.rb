@@ -17,13 +17,13 @@ module DoesKeyValue
       # Define accessors for the key column in the AR class:
       class_eval <<-EOS
         def #{key_name}
-          all_keys = self.send(:read_attribute, :#{key_value_column}) || Hash.new
-          return all_keys[:#{key_name}]
+          all_keys = self.send(:read_attribute, :#{key_value_column}) || Hashie::Mash.new
+          return all_keys.send("#{key_name}")
         end
       
         def #{key_name}=(value)
-          all_keys = self.send(:read_attribute, :#{key_value_column}) || Hash.new
-          all_keys[:#{key_name}] = value
+          all_keys = self.send(:read_attribute, :#{key_value_column}) || Hashie::Mash.new
+          all_keys.send("#{key_name}=", value)
           self.send(:write_attribute, :#{key_value_column}, all_keys)
         end
       EOS

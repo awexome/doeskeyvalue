@@ -4,7 +4,7 @@
 source "http://rubygems.org"
 
 # Runtime dependencies:
-
+gem "hashie"
 
 # Development dependencies:
 group :development do

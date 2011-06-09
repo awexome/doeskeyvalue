@@ -4,6 +4,7 @@
 require 'doeskeyvalue'
 require 'rails'
 require 'active_record'
+require 'hashie'
 
 require 'doeskeyvalue/keys'
 require 'doeskeyvalue/indexes'
@@ -54,7 +55,7 @@ module ActiveRecord
         # Identify the AR text column holding our data and serialize it:
         @@key_value_column = column.to_sym
         cattr_accessor :key_value_column
-        serialize @@key_value_column, Hash
+        serialize @@key_value_column, Hashie::Mash
       end
       
       Array.class_eval do
