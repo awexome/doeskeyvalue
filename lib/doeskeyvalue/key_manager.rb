@@ -54,7 +54,7 @@ module DoesKeyValue
         if column_keys = klass_keys[column_name]
           column_keys << key
         else
-          column_keys = [key]
+          klass_keys[column_name] = [key]
         end
       else
         @keys[klass] = {column_name => [key]}
@@ -71,7 +71,7 @@ module DoesKeyValue
           keys_lineage << keys_for(ancestor, column_name)
         end
       end
-      keys_lineage.flatten
+      keys_lineage.flatten.reject{|i| i.nil?}
     end
     
     
@@ -90,7 +90,7 @@ module DoesKeyValue
         if column_indexes = klass_indexes[column_name]
           column_indexes << key
         else
-          column_indexes = [key]
+          klass_indexes[column_name] = [key]
         end
       else
         @indexes[klass] = {@column_name => [key]}
@@ -107,7 +107,7 @@ module DoesKeyValue
           indexes_lineage << indexes_for(ancestor, column_name)
         end
       end
-      indexes_lineage.flatten
+      indexes_lineage.flatten.reject{|i| i.nil? }
     end
         
     

@@ -55,6 +55,7 @@ module ActiveRecord
         
         # Identify the AR text column holding our data and serialize it:
         @column_name = column.to_sym
+        cattr_accessor :column_name
         serialize @column_name, Hashie::Mash
         
         # Add the column to the key and column manager so we can reference it later:
