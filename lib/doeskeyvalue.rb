@@ -6,6 +6,7 @@ require 'rails'
 require 'active_record'
 require 'hashie'
 
+require 'doeskeyvalue/key_manager'
 require 'doeskeyvalue/keys'
 require 'doeskeyvalue/indexes'
 require 'doeskeyvalue/util'
@@ -53,9 +54,11 @@ module ActiveRecord
         extend DoesKeyValue::Indexes
         
         # Identify the AR text column holding our data and serialize it:
-        @@key_value_column = column.to_sym
-        cattr_accessor :key_value_column
-        serialize @@key_value_column, Hashie::Mash
+        @column_name = column.to_sym
+        serialize @column_name, Hashie::Mash
+        
+        # Add the column to the key and column manager so we can reference it later:
+        DoesKeyValue::KeyManager.instance.declare_column(self, @column_name)
       end
       
       Array.class_eval do
@@ -63,14 +66,31 @@ module ActiveRecord
       end
       
       instance_eval <<-EOS
-        def #{@@key_value_column}_key(key_name, opts={})
+        def #{@column_name}_key(key_name, opts={})
+          printf("DOESKEYVALUE: %s.%s key declared on class %s\n", @column_name, key_name, self.to_s)
+          column_name = :#{@column_name}
           key_name = key_name.to_sym
-          declare_key(@@key_value_column, key_name, opts)
+          declare_key(column_name, key_name, opts)
         end
         
-        def #{@@key_value_column}_index(key_name, opts={})
+        def #{@column_name}_index(key_name, opts={})
+          column_name = :#{@column_name}
           key_name = key_name.to_sym
-          declare_index(@@key_value_column, key_name, opts)
+          declare_index(column_name, key_name, opts)
+        end
+        
+        def key_value_columns
+          return DoesKeyValue::KeyManager.instance.columns_for(self)
+        end
+                  
+        def #{@column_name}_keys
+          column_name = :#{@column_name}
+          return DoesKeyValue::KeyManager.instance.keys_for(self, column_name)
+        end
+        
+        def #{@column_name}_indexes
+          column_name = :#{@column_name}
+          return DoesKeyValue::KeyManager.instance.indexes_for(self, column_name)
         end
       EOS
     end

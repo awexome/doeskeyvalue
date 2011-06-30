@@ -7,6 +7,8 @@ module DoesKeyValue
   module Keys
     
     def declare_key(key_value_column, key_name, opts={})
+      # printf("DECLARE_KEY: %s.%s key declaration beginning\n", key_value_column, key_name)
+
       raise DoesKeyValue::NoColumnNameSpecified unless key_value_column
       raise DoesKeyValue::NoKeyNameSpecified unless key_name
       raise DoesKeyValue::KeyAndIndexOptionsMustBeHash unless opts.is_a?(Hash)
@@ -32,6 +34,9 @@ module DoesKeyValue
       if opts[:index] == true
         declare_index(key_value_column, key_name)   # TODO: Provide mechanism for passing index options
       end
+      
+      # Add the key to the key and column manager:
+      DoesKeyValue::KeyManager.instance.declare_key(self, key_value_column, key_name, opts)
     
     end
     

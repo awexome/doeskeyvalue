@@ -93,8 +93,12 @@ module DoesKeyValue
       end
       after_destroy "update_index_#{key_value_column}_#{key_name}_after_destroy"
       
+      
+      # Add the index to the key and column manager:
+      DoesKeyValue::KeyManager.instance.declare_index(self, key_value_column, key_name, opts)
+      
     end
         
     
-  end # Index
+  end # Indexes
 end # DoesKeyValue

@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{doeskeyvalue}
-  s.version = "0.1.3"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Awexome Labs"]
-  s.date = %q{2011-06-09}
+  s.date = %q{2011-06-29}
   s.description = %q{Bring the fun of NoSQL into your SQL-backed Active Record objects in a compartmentalized way. Turns any text field on your objects into a schema-less key value store.}
   s.email = %q{gems@awexomelabs.com}
   s.extra_rdoc_files = [
@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
     "doeskeyvalue.gemspec",
     "lib/doeskeyvalue.rb",
     "lib/doeskeyvalue/indexes.rb",
+    "lib/doeskeyvalue/key_manager.rb",
     "lib/doeskeyvalue/keys.rb",
     "lib/doeskeyvalue/util.rb",
     "lib/generators/doeskeyvalue/doeskeyvalue_generator.rb",
