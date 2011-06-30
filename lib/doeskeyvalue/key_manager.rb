@@ -48,7 +48,6 @@ module DoesKeyValue
     # Declare a key in a specific column set for a specific class
     def declare_key(klass, column_name, key, opts={})
       # TODO: Store the key options in the manager
-      printf "KEY_MANAGER: KeyValueKey %s.%s declared on class %s\n", column_name, key, klass
       column_name = column_name.to_sym
       @keys ||= Hashie::Mash.new
       if klass_keys = @keys[klass]
@@ -85,8 +84,6 @@ module DoesKeyValue
     # Declare an index in a specific column set for a specific class
     def declare_index(klass, column_name, key, opts={})
       # TODO: Store the index options in the manager
-      
-      printf "KEY_MANAGER: KeyValueIndex %s.%s declared on class %s\n", column_name, key, klass
       column_name = column_name.to_sym
       @indexes ||= Hashie::Mash.new
       if klass_indexes = @indexes[klass]

@@ -67,7 +67,6 @@ module ActiveRecord
       
       instance_eval <<-EOS
         def #{@column_name}_key(key_name, opts={})
-          printf("DOESKEYVALUE: %s.%s key declared on class %s\n", @column_name, key_name, self.to_s)
           column_name = :#{@column_name}
           key_name = key_name.to_sym
           declare_key(column_name, key_name, opts)
