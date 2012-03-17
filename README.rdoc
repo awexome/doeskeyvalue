@@ -43,7 +43,7 @@ database level. Check it out:
   mod.uid
   => "mccolin"
   
-You can see the serialized key-value structure at any time, as well. Just access your old filed:
+You can see the serialized key-value structure at any time, as well. Just access your old field:
 
   mod.settings
   => {:uid=>"mccolin"}
@@ -95,10 +95,9 @@ of Rails. Check that out at http://github.com/mccolin/do_document_fields
 * Fork the project
 * Start a feature/bugfix branch
 * Commit and push until you are happy with your contribution
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
 == Copyright
 
-Copyright (c) 2011 Awexome Labs, LLC. http://awexomelabs.com/
+Copyright (c) 2012 Awexome Labs, LLC. http://awexomelabs.com/
 
