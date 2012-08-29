@@ -1,9 +1,18 @@
 = DoesKeyValue
 
-Bring the fun of NoSQL into your SQL-backed Active Record objects in a compartmentalized way. Turns 
-any text field on your objects into a schema-less key value store.
+NoSQL-like key value stores in SQL-backed ActiveRecord objects. Arbitrary keys behave 
+like dynamic, indexable, searchable first-order attributes.
 
-== DOCUMENTATION UPDATES PENDING REFLECTING BRANCHES, v0.9.* CHANGES
+== Deprecation Notice
+
+DoesKeyValue is undergoing a substantial API change. The old branch of work (v0.2.*) is
+now referred to as the "Albus" branch and the new line of work (v0.9.0+) is referred to
+as the "Bellatrix" branch. Review accordingly.
+
+When ready, the Bellatrix code will be moved into the master branch and the Albus/v0.2
+branch will no longer be supported.
+
+This documentation refers to the Bellatrix/v0.9+ branch and its corresponding API.
 
 
 == Installation
@@ -17,87 +26,94 @@ And add a gem dependency to your Gemfile:
   gem "doeskeyvalue"
 
 
-== Example 
+== Column-Based Storage Example 
 
-Quick and simple. First, add the declaration to your ActiveRecord model:
+In any ActiveRecord model in which you'd like to have key-value support, you simply
+declare your intention to declare keys:
 
-  doeskeyvalue :settings
+  does_keys :column=>"settings"
   
-In this invocation, "settings" is the name of TEXT or BLOB field on your model's database table. Think
-of it as something you'd typically serialize, but would prefer solid accessor and finding behavior on.
+In this invocation, "settings" is the name of TEXT or BLOB field on your model's database
+table. Think of it as something you'd typically serialize, but would prefer solid accessor 
+and finding behavior on.
 
-To add keys to your document, using the name of the field you provided, before (in this case 
-"settings"), add keys individually like so:
+Add keys to your document field individually like so:
 
-  settings_key :uid
-  settings_key :email
-  settings_key :name
-  
-This adds a uid, email, and name field to your record. You can use these fields just like regular 
-columns on your ActiveRecord object, but they're happily stored within your TEXT/BLOB column at the
-database level. Check it out:
+  has_key :email                            # Default type is string
+  has_key :uid, :type=>:integer             # But type can be overidden easily
+  has_key :city, :default=>"Awesomeville"   # You can also declare default values
+
+This adds email, uid, and city fields to your record. You can use these fields just like regular 
+columns on your ActiveRecord object, but they're happily stored within your TEXT/BLOB column at 
+the database level. Check it out:
 
   mod = Model.new
   
-  mod.uid = "mccolin"
-  => "mccolin"
+  mod.email = "me@awexo.me"
+  => "me@awexo.me"
   
-  mod.uid
-  => "mccolin"
+  mod.email
+  => "me@awexo.me"
   
 You can see the serialized key-value structure at any time, as well. Just access your old field:
 
   mod.settings
-  => {:uid=>"mccolin"}
-  
-At this point, we have a fancy serialized Hash on our hands. What we really want to be able to do is
-search for objects of type Model that have certain values. That's possible, too. First, generate the
-necessary migration:
-
-  rails g doeskeyvalue
-  
-This creates db/migrate/XXX_create_key_value_index.rb for you. Migrate your database:
-
-  rake db:migrate
-  
-Now, you can declare keys that you'd like to be searchable within Model like so:
-
-  settings_index :uid
-  settings_index :email
-  
-Now, you've added powerful finders to your objects. As your objects are created, accessed, and updated,
-metadata in your index table will be updated that allows you to search against those objects similarly
-to how you'd perform lookups with a regular finder. Like so:
-
-  Model.find_all_by_uid(123)
-  => [#<Model:0x000001016b51a0 @settings=>{:uid=>123}>, #<Model:0x000001016b51a0 @settings=>{:uid=>123}>, ...]
-  
-  Model.find_all_with_settings(:email=>"foo@bar.com")
-  => [#<Model:0x000001016b51a0 @settings=>{:email=>"foo@bar"}>, ...]
-
-You can only run finds on keys for which you've added an index, but you can add and remove indexes as
-necessary simply by removing the index declaration from your model.
-
-Likewise, you can remove keys from any model by removing the key declaration. This allows you to add
-and remove keys from every ActiveRecord object at will, without having to build any migrations, but you
-can still reap the benefits of whatever SQL-backed relational database you've chosen for the bulk of
-your application's heavy lifting.
+  => {:email=>"me@awexo.me"}
 
 
-== Prior Versions
+== Table-Based Storage Example
 
-DoesKeyValue is a much newer and cleaner version of the old "do_document_fields" plugin for prior versions
-of Rails. Check that out at http://github.com/mccolin/do_document_fields
+For larger key sets, you may find it advantageous to move your key-value storage into a separate
+database table, instead of the baked-in serialized column. You can do this quite easily by using
+a different flag in your initialization call:
+
+  does_keys :table=>"user_preferences"
+
+In this example, we're storing our key-value pairs as their own independent rows within the
+user_preferences database table. You declare keys and manipulate values in exactly the same way
+as before:
+
+  has_key :bgcolor, :default=>"blue"
+  has_key :birthday, :type=>:datetime
+  has_key :likes_ice_cream, :type=>:boolean, :default=>true
+
+  mod.likes_ice_cream
+  => true
+
+  mod.likes_ice_cream = false
+  => false
+
+  mod.bgcolor
+  => "blue"
 
 
-== Contributions
- 
-* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
-* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
-* Fork the project
-* Start a feature/bugfix branch
-* Commit and push until you are happy with your contribution
-* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+== Search and Lookups
+
+At this point, you've seen how flexible the key-value storage mechanism can be. You can add and
+remove keys at will, and manipulate data just like typical ActiveRecord attributes. But how do
+you search across that data?
+
+You can use scope finders for all of your declared keys. Observe:
+
+  has_key :email
+  has_key :name
+
+  Model.with_name("Charlie")
+  => [#<Model:0x000001016b51a0 @settings=>{:name=>"Charlie"}>]
+
+  Model.with_name(["Charlie","Mac","Dennis","Dee"])
+  => [#<Model:0x000001016b51a0 @settings=>{:name=>"Charlie"}>, #<Model:0x000001016b51a0 @settings=>{:name=>"Dee"}>, ...]
+
+All keys are indexed by default. You can turn indexing off for any individual key by sending a 
+flag to the key declaration:
+
+  has_key :bgcolor, :index=>false             # This turns off searchability for the bgcolor key
+
+Indexing key-value columns adds a bit of overhead to your save and update method callbacks, which
+you may want to turn off in larger systems for keys where searching is not required.
+
+
+
 
 == Copyright
 
