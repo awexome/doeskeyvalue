@@ -20,14 +20,20 @@ module DoesKeyValue
       storage_column = DoesKeyValue::State.instance.options_for_class(self)[:column]
 
       define_method(key_name) do
-        puts "Accessing key:#{key_name} for class:#{self}"
+        DoesKeyValue.log("Accessing key:#{key_name} for class:#{self.class}")
         blob = self.send(:read_attribute, storage_column) || Hash.new
         blob = Hashie::Mash.new(blob)
-        return blob.send(key_name)
+        value = blob.send(key_name)
+
+        if value
+          return value
+        elsif default_value = self.class.key_options(key_name)[:default]
+          return default_value
+        end
       end
 
       define_method("#{key_name}=") do |value|
-        puts "Modifying value for key:#{key_name} to value:#{value}"
+        DoesKeyValue.log("Modifying value for key:#{key_name} to value:#{value}")
         blob = self.send(:read_attribute, storage_column) || Hash.new
         blob = Hashie::Mash.new(blob)
         blob[key_name] = value
@@ -40,6 +46,11 @@ module DoesKeyValue
     # Return a list of currently supported keys:
     def keys
       DoesKeyValue::State.instance.keys[self.to_s]
+    end
+
+    # Return the specific configuration for a given key:
+    def key_options(key_name)
+      DoesKeyValue::State.instance.options_for_key(self, key_name)
     end
 
 

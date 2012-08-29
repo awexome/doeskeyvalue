@@ -31,12 +31,15 @@ module DoesKeyValue
 
     # Return the configuration for a given klass:
     def options_for_class(klass)
+      DoesKeyValue.log("State: Querying options_for_class for class:#{klass.to_s}")
       @classes[klass.to_s] rescue {}
     end
 
     # Return the list of keys for a given klass:
-    def keys_for_class(klass)
-      @keys[klass.to_s] rescue []
+    def options_for_key(klass, key_name)
+      DoesKeyValue.log("State: Querying options_for_key for class:#{klass.to_s} and key:#{key_name}")
+      key_def = (@keys[klass.to_s] || Array.new).find{|x| x[:name]==key_name.to_sym} || {}
+      opts = key_def[:options]
     end
 
 
