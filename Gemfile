@@ -4,7 +4,6 @@
 source "http://rubygems.org"
 
 # Runtime dependencies:
-gem "activerecord", ">= 3.1.0"
 gem "hashie", "~> 1.2.0"
 
 # Development dependencies:
