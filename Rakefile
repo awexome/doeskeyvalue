@@ -15,12 +15,12 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.name = "doeskeyvalue"
-  gem.homepage = "http://github.com/mccolin/doeskeyvalue"
+  gem.homepage = "http://github.com/awexome/doeskeyvalue"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
-  gem.email = "colin.mccloskey@gmail.com"
-  gem.authors = ["Colin McCloskey"]
+  gem.summary = %Q{NoSQL-like key value stores in SQL-backed ActiveRecord objects.}
+  gem.description = %Q{NoSQL-like key value stores in SQL-backed ActiveRecord objects. Arbitrary keys behave like dynamic, indexable, searchable first-order attributes.}
+  gem.email = "engineering@awexomelabs.com"
+  gem.authors = ["Awexome Labs"]
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
