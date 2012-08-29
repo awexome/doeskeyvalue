@@ -19,6 +19,15 @@ module DoesKeyValue
 
       storage_column = DoesKeyValue::State.instance.options_for_class(self)[:column]
 
+      if opts[:index]
+        scope "with_#{key_name}", lambda {|value| 
+          where(["`#{storage_column}` LIKE ?", "%#{key_name}: #{value}%"])
+        }
+        DoesKeyValue.log("Scope with_#{key_name} added for indexed key #{key_name}")
+      else
+        DoesKeyValue.log("No search scope added for key #{key_name}; index set to false")
+      end
+
       define_method(key_name) do
         DoesKeyValue.log("Accessing key:#{key_name} for class:#{self.class}")
         blob = self.send(:read_attribute, storage_column) || Hash.new
