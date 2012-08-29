@@ -24,11 +24,14 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "doeskeyvalue.gemspec",
-    "lib/doeskeyvalue.rb"
+    "lib/doeskeyvalue.rb",
+    "lib/doeskeyvalue/column_storage.rb",
+    "lib/doeskeyvalue/state.rb",
+    "lib/doeskeyvalue/table_storage.rb"
   ]
   s.homepage = "http://github.com/awexome/doeskeyvalue"
   s.licenses = ["MIT"]
-  s.require_paths = ["lib", "lib/doeskeyvalue"]
+  s.require_paths = ["lib"]
   s.rubygems_version = "1.8.17"
   s.summary = "NoSQL-like key value stores in SQL-backed ActiveRecord objects."
 
