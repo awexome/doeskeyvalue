@@ -7,6 +7,8 @@ require "active_record"
 require "hashie"
 
 require "doeskeyvalue/state"
+require "doeskeyvalue/util"
+require "doeskeyvalue/does_key_value_index"
 require "doeskeyvalue/column_storage"
 require "doeskeyvalue/table_storage"
 

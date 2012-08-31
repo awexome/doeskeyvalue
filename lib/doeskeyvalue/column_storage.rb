@@ -5,6 +5,9 @@
 #  or BLOB fields on the same table as the parent object.
 
 module DoesKeyValue
+
+  SUPPORTED_DATA_TYPES = %w(string integer decimal boolean datetime)
+
   module ColumnStorage
 
     # Define a supported key
@@ -15,19 +18,16 @@ module DoesKeyValue
         default: nil
       }.merge(opts)
 
-      DoesKeyValue::State.instance.add_key(self, key_name, opts)
+      key_indexed = opts[:index]
+      key_type = opts[:type].to_sym
+      key_default_value = opts[:default]
 
+      raise Exception.new("Data type not supported: #{key_type}") unless DoesKeyValue::SUPPORTED_DATA_TYPES.include?(key_type.to_s)
+
+      DoesKeyValue::State.instance.add_key(self, key_name, opts)
       storage_column = DoesKeyValue::State.instance.options_for_class(self)[:column]
 
-      if opts[:index]
-        scope "with_#{key_name}", lambda {|value| 
-          where(["`#{storage_column}` LIKE ?", "%#{key_name}: #{value}%"])
-        }
-        DoesKeyValue.log("Scope with_#{key_name} added for indexed key #{key_name}")
-      else
-        DoesKeyValue.log("No search scope added for key #{key_name}; index set to false")
-      end
-
+      # Accessor for new key with support for default value:
       define_method(key_name) do
         DoesKeyValue.log("Accessing key:#{key_name} for class:#{self.class}")
         blob = self.send(:read_attribute, storage_column) || Hash.new
@@ -41,13 +41,41 @@ module DoesKeyValue
         end
       end
 
+      # Manipulator for new key:
       define_method("#{key_name}=") do |value|
         DoesKeyValue.log("Modifying value for key:#{key_name} to value:#{value}")
         blob = self.send(:read_attribute, storage_column) || Hash.new
         blob = Hashie::Mash.new(blob)
-        blob[key_name] = value
+
+        typed_value = DoesKeyValue::Util.to_type(value, key_type)
+
+        blob[key_name] = typed_value
         self.send(:write_attribute, storage_column, blob.to_hash)
       end
+
+      # If key is indexed, add scopes, finders, and callbacks for index management:
+      if key_indexed
+
+        # With scope:
+        scope "with_#{key_name}", lambda {|value| 
+          where(["`#{storage_column}` LIKE ?", "%#{key_name}: #{value}%"])
+        }
+        DoesKeyValue.log("Scope with_#{key_name} added for indexed key #{key_name}")
+      
+        # Update the index after save:
+        define_method("update_index_for_#{key_name}") do
+          DoesKeyValueIndex.update_index(self, key_name, self.send(key_name))
+        end
+        after_save "update_index_for_#{key_name}"
+
+        # Delete the index after destroy:
+        define_method("destroy_index_for_#{key_name}") do
+          DoesKeyValueIndex.delete_index(self, key_name)
+        end
+        after_destroy "destroy_index_for_#{key_name}"
+
+      end # if key_indexed
+
 
     end
 
