@@ -21,15 +21,9 @@ class DoeskeyvalueGenerator < Rails::Generators::Base
   
   def create_migration_file
     puts "Creating DoesKeyValue index table migration"
-
-    if table_name = ARGV.first
-      puts "=> #{table_name} table to be created"
-      migration_template "create_key_value_index.rb", "db/migrate/create_key_value_index_#{table_name}.rb", table_name:table_name
-    else
-      puts "=> Generic index table to be created"
-      migration_template "create_key_value_index.rb", "db/migrate/create_key_value_index.rb", table_name:"key_value_index"
-    end
-
+    index_table_name = ARGV.first || "key_value_index"
+    puts "=> #{index_table_name} table to be created"
+    migration_template "create_key_value_index.rb", "db/migrate/create_#{index_table_name}.rb", table_name:index_table_name
   end
   
 end

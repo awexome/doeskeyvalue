@@ -13,6 +13,22 @@ class DoesKeyValueIndex < ActiveRecord::Base
                   :value_string, :value_integer, :value_decimal, :value_boolean, :value_datetime
 
 
+  # Read the appropriate index values for the given object/key combination:
+  def self.read_index(object, key_name)
+    object_type = object.class.to_s
+    object_id = object.id
+    key_type = object.class.key_options(key_name)[:type]
+
+    # Prepare the query conditions:
+    condition_set = {obj_type: object_type, obj_id: object_id, key_name: key_name}
+
+    # Access the appropriate value column of the returned index:
+    table_agnostic_exec(object.class) do 
+      DoesKeyValueIndex.where(condition_set).first().try(:send, "value_#{key_type}")
+    end
+  end
+
+
   # Update the appropriate index with new/changed information for the given
   # object/key/value combination:
   def self.update_index(object, key_name, value)
@@ -35,15 +51,14 @@ class DoesKeyValueIndex < ActiveRecord::Base
     DoesKeyValue.log("condition_set: #{condition_set.inspect}")
     DoesKeyValue.log("create_set: #{create_set.inspect}")
 
-
-    # TODO: Change table_name to match the specified table for this class
-
-    updated_count = DoesKeyValueIndex.update_all( update_set, condition_set )
-    if !value.nil? && updated_count == 0
-      DoesKeyValueIndex.create( create_set )
+    # Update an index in a table-agnostic way to support table-based key-value storage in
+    # database tables other than the universal table:
+    table_agnostic_exec(object.class) do
+      updated_count = DoesKeyValueIndex.update_all( update_set, condition_set )
+      if !value.nil? && updated_count == 0
+        DoesKeyValueIndex.create( create_set )
+      end
     end
-
-    # TODO: Change the value for table_name back to the original value
 
   end
 
@@ -53,14 +68,57 @@ class DoesKeyValueIndex < ActiveRecord::Base
     object_type = object.class.to_s
     object_id = object.id
 
-    # TODO: Change table_name to match the specified table for this class
+    deleted_count = table_agnostic_exec(object.class) do
+      DoesKeyValueIndex.delete_all(
+        obj_type: object_type, obj_id: object_id, key_name: key_name
+      )
+    end
+  end
 
-    deleted_count = DoesKeyValueIndex.delete_all(
-      obj_type: object_type, obj_id: object_id, key_name: key_name
-    )
 
-    # TODO: Change the value for table_name back to the original value
-    
+
+  private
+
+  # Return true only if the storage method for the given class is table:
+  def self.table_storage_for_class?(klass)
+    storage_options = DoesKeyValue::State.instance.options_for_class(klass)
+    storage_options[:table].nil? ? false : true
+  end
+
+  # Perform a block action inside of table-altered query:
+  def self.table_agnostic_exec(klass)
+    begin
+      original_table_name = DoesKeyValueIndex.table_name
+      if DoesKeyValueIndex.table_storage_for_class?(klass)
+        class_storage_options = DoesKeyValue::State.instance.options_for_class(klass)
+        if class_storage_options[:table]
+          DoesKeyValueIndex.table_name = class_storage_options[:table]
+          DoesKeyValue.log("Storage table for index changed to '#{DoesKeyValueIndex.table_name}'")
+        end
+      end
+
+      exec_result = yield
+
+      if DoesKeyValueIndex.table_storage_for_class?(klass)
+        DoesKeyValueIndex.table_name = original_table_name
+        DoesKeyValue.log("Storage table for index changed back to original '#{DoesKeyValueIndex.table_name}")
+      end
+
+      return exec_result
+
+    rescue ActiveRecord::StatementInvalid => e
+      DoesKeyValue.log("Database query statement invalid: #{e.message}")
+      if (e.message =~ /doesn't exist/)
+        DoesKeyValue.log("It appears the index table `#{DoesKeyValueIndex.table_name}` expected has not been generated.")
+        DoesKeyValue.log("To generate the necessary table run: rails generate doeskeyvalue #{DoesKeyValueIndex.table_name}")
+      end
+      raise e
+
+    ensure
+      # Ensure that the table name is always restored
+      DoesKeyValueIndex.table_name = original_table_name
+      DoesKeyValue.log("After table-agnostic execution, table name restored to '#{DoesKeyValueIndex.table_name}'")
+    end
   end
 
 

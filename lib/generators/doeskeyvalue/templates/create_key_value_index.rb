@@ -7,7 +7,7 @@
   table_name = config[:table_name]
 -%>
 
-class CreateKeyValueIndex < ActiveRecord::Migration
+class Create<%=table_name.camelize-%> < ActiveRecord::Migration
   def self.up
     create_table :<%=table_name-%> do |t|
       # The object is linked by class type and id:
