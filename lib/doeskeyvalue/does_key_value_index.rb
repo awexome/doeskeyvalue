@@ -6,9 +6,7 @@
 class DoesKeyValueIndex < ActiveRecord::Base
 
   # The default index table (overidden individually for custom tables):
-  def self.table_name
-    "key_value_index"
-  end
+  self.table_name = "key_value_index"
 
   # All attributes of an index row are mass-editable:
   attr_accessible :obj_type, :obj_id, :key_name, :key_type, 
