@@ -5,19 +5,24 @@ like dynamic, indexable, searchable first-order attributes.
 
 == Deprecation Notice
 
-DoesKeyValue is undergoing a substantial API change. The old branch of work (v0.2.*) is
-now referred to as the "Albus" branch and the new line of work (v0.9.0+) is referred to
-as the "Bellatrix" branch. Review accordingly.
+DoesKeyValue is undergoing a substantial API change in order to better support new features
+and alter the approach to previously-included features. The "old" gem versions will have 
+number in the v0.2.* series and are maintained (though only for major bugfixes) on the 
+{"albus" branch}[https://github.com/awexome/doeskeyvalue/tree/albus] in the repository. 
+Going forward, new work on the gem will be of the v0.9.* version series and will be 
+completed in {"bellatrix" branch}[https://github.com/awexome/doeskeyvalue/tree/bellatrix]
+and made available in master.
 
-When ready, the Bellatrix code will be moved into the master branch and the Albus/v0.2
-branch will no longer be supported.
+When ready, the new "bellatrix" API will be released as a public gem with v0.9.0, but until
+then, users can live on the edge by referencing this repository (master or bellatrix branches)
+in their Gemfiles.
 
-This documentation refers to the Bellatrix/v0.9+ branch and its corresponding API.
+This documentation refers to only the new/v0.9+ branch and its corresponding API.
 
 
 == Installation
 
-Do the usual, of course:
+Tried and true:
 
   gem install doeskeyvalue
 
@@ -48,10 +53,8 @@ columns on your ActiveRecord object, but they're happily stored within your TEXT
 the database level. Check it out:
 
   mod = Model.new
-  
   mod.email = "me@awexo.me"
   => "me@awexo.me"
-  
   mod.email
   => "me@awexo.me"
   
@@ -61,11 +64,40 @@ You can see the serialized key-value structure at any time, as well. Just access
   => {:email=>"me@awexo.me"}
 
 
+=== Indexes and Searchability
+
+By default, all keys specified in column-based storage also have indexes which provide scopes
+and searchability. This behavior, however, requires the addition of an key index database table,
+which you can generate on the command line:
+
+  > rails generate doeskeyvalue
+  > rake db:migrate
+
+This will add a +key_value_index+ table to your database, which will serve as an application-wide
+index and cache of your declared keys. Key values you modify on your objects are stored/cached
+within the +key_value_index+ table, which is used in lookups.
+
+For each key, a default scope of the form "with_KEYNAME" is provided for your use:
+
+  Model.with_email("foo@bar.com")
+  => []
+  Model.with_email("me@awexo.me")
+  => [#<User id: 1, ..., settings: {"email"=>"me@awexo.me"}, ...>] 
+
+If you'd prefer to not have this searchability, you can forgo the creation of an index and related
+scope for any of your keys, like so:
+
+  has_key :email, :index=>false       # Deny index creation (default setting for index is true)
+
+Naturally, if all of your keys omit an index, you will not require the +key_value_index+ table in
+your project.
+
+
 == Table-Based Storage Example
 
 For larger key sets, you may find it advantageous to move your key-value storage into a separate
-database table, instead of the baked-in serialized column. You can do this quite easily by using
-a different flag in your initialization call:
+database table altogether, instead of the baked-in serialized TEXT/BLOB column. You can do this
+quite easily by using a different flag in your initialization call:
 
   does_keys :table=>"user_preferences"
 
@@ -79,40 +111,27 @@ as before:
 
   mod.likes_ice_cream
   => true
-
   mod.likes_ice_cream = false
   => false
-
   mod.bgcolor
   => "blue"
 
+However, unlike with column-based storage, these values are immediately written to the table
+specified in the invocation (in this case, +user_preferences+).
 
-== Search and Lookups
+You will need to generate your separate key value indexes using the generator, while providing
+a table name:
 
-At this point, you've seen how flexible the key-value storage mechanism can be. You can add and
-remove keys at will, and manipulate data just like typical ActiveRecord attributes. But how do
-you search across that data?
+  > rails generate doeskeyvalue user_preferences
+  > rake db:migrate
 
-You can use scope finders for all of your declared keys. Observe:
+All keys using the separate table-based storage approach are automatically indexed. Values are
+read directly from the supporting index table.
 
-  has_key :email
-  has_key :name
-
-  Model.with_name("Charlie")
-  => [#<Model:0x000001016b51a0 @settings=>{:name=>"Charlie"}>]
-
-  Model.with_name(["Charlie","Mac","Dennis","Dee"])
-  => [#<Model:0x000001016b51a0 @settings=>{:name=>"Charlie"}>, #<Model:0x000001016b51a0 @settings=>{:name=>"Dee"}>, ...]
-
-All keys are indexed by default. You can turn indexing off for any individual key by sending a 
-flag to the key declaration:
-
-  has_key :bgcolor, :index=>false             # This turns off searchability for the bgcolor key
-
-Indexing key-value columns adds a bit of overhead to your save and update method callbacks, which
-you may want to turn off in larger systems for keys where searching is not required.
-
-
+If desired, multiple models can freely store their values in a single table. This may be desired
+for locality of all settings across a varieties of classes. You could, for instance, create one
++preferences+ table, which collects key values from User, Account, and Post models. For each class,
+the invocation to +does_keys+ is the same. Simple!
 
 
 == Copyright
