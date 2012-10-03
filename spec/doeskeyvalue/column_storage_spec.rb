@@ -1,5 +1,5 @@
 # AWEXOME LABS
-# DoesKeyValue Test Suite
+# DoesKeyValue Test Suite : Column Storage
 
 # Get started:
 require File.expand_path(File.dirname(__FILE__)+"/../spec_helper")
