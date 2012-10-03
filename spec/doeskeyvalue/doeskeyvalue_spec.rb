@@ -13,6 +13,22 @@ ActiveRecord::Base.connection.create_table(:users) do |t|
   t.timestamps
 end
 
+# Build the generator-style key value index table:
+ActiveRecord::Base.connection.drop_table(:key_value_index) if ActiveRecord::Base.connection.table_exists?(:key_value_index)
+ActiveRecord::Base.connection.create_table(:key_value_index) do |t|
+  t.string :obj_type
+  t.integer :obj_id
+  t.string :key_name
+  t.string :key_type
+  t.string :value_string
+  t.integer :value_integer
+  t.decimal :value_decimal
+  t.boolean :value_boolean
+  t.datetime :value_datetime
+  t.timestamps
+end
+
+
 # Define the sample User model which will exhibit column-based storage:
 class User < ActiveRecord::Base
   attr_accessible :name, :email, :settings
@@ -62,6 +78,13 @@ describe "column_storage" do
     @user.default_val_key.should == "The Default"
   end
 
+  it "saves and returns the same value for keys" do
+    @user.string_key = "Ron Swanson"
+    @user.save
+    @user.reload
+    @user.string_key.should == "Ron Swanson"
+  end
+
   it "sets a string value when assigned" do 
     @user.string_key = "Hello"
     @user.string_key.should == "Hello"
@@ -101,6 +124,14 @@ describe "column_storage" do
 
   it "does not define with_ scope for non-indexed keys" do
     User.methods.include?(:with_indexless_key).should be_false
+  end
+
+  it "finds objects via the scope and index" do
+    @user.string_key = "Champion"
+    @user.save
+    find_results = User.with_string_key("Champion")
+    find_results.length.should == 1
+    find_results.first.should == @user
   end
 
 end # column_stage
