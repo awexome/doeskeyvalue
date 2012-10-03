@@ -1,0 +1,25 @@
+# AWEXOME LABS
+# DoesKeyValue
+
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
+
+require "rubygems"
+require "bundler"
+Bundler.setup(:default, :development)
+
+require "active_record"
+require "active_support"
+require "doeskeyvalue"
+require "rspec"
+require "rspec/autorun"
+
+root = File.expand_path(File.join(File.dirname(__FILE__), ".."))
+ActiveRecord::Base.establish_connection(
+  :adapter => "sqlite3", 
+  :database => ":memory:"
+  # :database => "#{root}/db/safeattributes.db"
+)
+
+RSpec.configure do |config|
+end

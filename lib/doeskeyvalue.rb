@@ -21,7 +21,7 @@ module DoesKeyValue
 
   # Log messages
   def self.log(msg)
-    puts "DoesKeyValue: #{msg}"
+    # HOLD LOGGING: puts "DoesKeyValue: #{msg}"
   end
     
 end # DoesKeyValue
