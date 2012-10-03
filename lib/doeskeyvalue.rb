@@ -6,6 +6,7 @@ require "active_record"
 require "active_support"
 require "hashie"
 
+require "doeskeyvalue/configuration"
 require "doeskeyvalue/state"
 require "doeskeyvalue/util"
 require "doeskeyvalue/does_key_value_index"
@@ -21,7 +22,7 @@ module DoesKeyValue
 
   # Log messages
   def self.log(msg)
-    # HOLD LOGGING: puts "DoesKeyValue: #{msg}"
+    puts "DoesKeyValue: #{msg}" unless configuration.log_level == :silent
   end
     
 end # DoesKeyValue
