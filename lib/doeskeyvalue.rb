@@ -2,8 +2,8 @@
 # DoesKeyValue
 
 require "doeskeyvalue"
-require "rails"
 require "active_record"
+require "active_support"
 require "hashie"
 
 require "doeskeyvalue/state"
@@ -14,10 +14,6 @@ require "doeskeyvalue/table_storage"
 
 module DoesKeyValue
 
-  # Create a Rails Engine
-  class Engine < Rails::Engine
-  end
-  
   # Return the current working version from VERSION file:
   def self.version
     @@version ||= File.open(File.join(File.dirname(__FILE__), "..", "VERSION"), "r").read.strip
