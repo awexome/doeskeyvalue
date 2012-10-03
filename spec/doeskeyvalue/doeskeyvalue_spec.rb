@@ -93,6 +93,16 @@ describe "column_storage" do
     @user.date_key.class.should == DateTime
   end
 
+  it "defines with_ scope for indexed keys" do
+    %w(string_key integer_key decimal_key bool_key date_key default_val_key).each do |key_name|
+      User.methods.include?("with_#{key_name}".to_sym).should be_true
+    end
+  end
+
+  it "does not define with_ scope for non-indexed keys" do
+    User.methods.include?(:with_indexless_key).should be_false
+  end
+
 end # column_stage
 
 
