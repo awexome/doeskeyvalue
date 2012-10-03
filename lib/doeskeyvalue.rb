@@ -9,7 +9,7 @@ require "hashie"
 require "doeskeyvalue/configuration"
 require "doeskeyvalue/state"
 require "doeskeyvalue/util"
-require "doeskeyvalue/does_key_value_index"
+require "doeskeyvalue/index"
 require "doeskeyvalue/column_storage"
 require "doeskeyvalue/table_storage"
 

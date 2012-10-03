@@ -32,7 +32,7 @@ module DoesKeyValue
           return nil
         end
 
-        value = DoesKeyValueIndex.read_index(self, key_name)
+        value = DoesKeyValue::Index.read_index(self, key_name)
         if !value.nil?
           return value
         elsif default_value = self.class.key_options(key_name)[:default]
@@ -44,7 +44,7 @@ module DoesKeyValue
       define_method("#{key_name}=") do |value|
         DoesKeyValue.log("Modifying BY TABLE value for key:#{key_name} to value:#{value}")
         unless self.new_record?
-          DoesKeyValueIndex.update_index(self, key_name, value)
+          DoesKeyValue::Index.update_index(self, key_name, value)
         else
           DoesKeyValue.log("-- Object does not have a database ID. Holding back table index update.")
         end
@@ -52,13 +52,13 @@ module DoesKeyValue
 
       # All table-based key-value stores have index finders and scopes:
       scope "with_#{key_name}", lambda {|value| 
-        DoesKeyValueIndex.find_objects(self, key_name, value)
+        DoesKeyValue::Index.find_objects(self, key_name, value)
       }
       DoesKeyValue.log("Scope with_#{key_name} added for table-storage key #{key_name}")
       
       # Delete the index after destroy:
       define_method("destroy_index_for_#{key_name}") do
-        DoesKeyValueIndex.delete_index(self, key_name)
+        DoesKeyValue::Index.delete_index(self, key_name)
       end
       after_destroy "destroy_index_for_#{key_name}"
 

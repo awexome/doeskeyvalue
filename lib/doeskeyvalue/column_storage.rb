@@ -58,19 +58,19 @@ module DoesKeyValue
 
         # With scope:
         scope "with_#{key_name}", lambda {|value| 
-          DoesKeyValueIndex.find_objects(self, key_name, value)
+          DoesKeyValue::Index.find_objects(self, key_name, value)
         }
         DoesKeyValue.log("Scope with_#{key_name} added for indexed key #{key_name}")
       
         # Update the index after save:
         define_method("update_index_for_#{key_name}") do
-          DoesKeyValueIndex.update_index(self, key_name, self.send(key_name))
+          DoesKeyValue::Index.update_index(self, key_name, self.send(key_name))
         end
         after_save "update_index_for_#{key_name}"
 
         # Delete the index after destroy:
         define_method("destroy_index_for_#{key_name}") do
-          DoesKeyValueIndex.delete_index(self, key_name)
+          DoesKeyValue::Index.delete_index(self, key_name)
         end
         after_destroy "destroy_index_for_#{key_name}"
 
