@@ -58,7 +58,7 @@ module DoesKeyValue
 
         # With scope:
         scope "with_#{key_name}", lambda {|value| 
-          where(["`#{storage_column}` LIKE ?", "%#{key_name}: #{value}%"])
+          DoesKeyValueIndex.find_objects(self, key_name, value)
         }
         DoesKeyValue.log("Scope with_#{key_name} added for indexed key #{key_name}")
       

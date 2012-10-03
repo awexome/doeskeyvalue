@@ -52,9 +52,9 @@ module DoesKeyValue
 
       # All table-based key-value stores have index finders and scopes:
       scope "with_#{key_name}", lambda {|value| 
-        where(["`#{storage_column}` LIKE ?", "%#{key_name}: #{value}%"])
+        DoesKeyValueIndex.find_objects(self, key_name, value)
       }
-      DoesKeyValue.log("Scope with_#{key_name} added for indexed key #{key_name}")
+      DoesKeyValue.log("Scope with_#{key_name} added for table-storage key #{key_name}")
       
       # Delete the index after destroy:
       define_method("destroy_index_for_#{key_name}") do

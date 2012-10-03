@@ -13,6 +13,21 @@ class DoesKeyValueIndex < ActiveRecord::Base
                   :value_string, :value_integer, :value_decimal, :value_boolean, :value_datetime
 
 
+  # Search the database for objects matching the given query for the given key:
+  def self.find_objects(klass, key_name, value)
+    object_type = klass.to_s
+    key_type = klass.key_options(key_name)[:type]
+
+    condition_set = {obj_type: object_type, key_name: key_name, key_type: key_type, "value_#{key_type}"=>value}
+    DoesKeyValue.log("Condition Set for index find: #{condition_set.inspect}")
+    table_agnostic_exec(klass) do
+      index_rows = DoesKeyValueIndex.where(condition_set)
+      object_ids = index_rows.blank? ? [] : index_rows.collect {|i| i.obj_id }
+      klass.where(:id=>object_ids)
+    end
+  end
+
+
   # Read the appropriate index values for the given object/key combination:
   def self.read_index(object, key_name)
     object_type = object.class.to_s
