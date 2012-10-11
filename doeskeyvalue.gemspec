@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Awexome Labs"]
-  s.date = "2012-08-29"
+  s.date = "2012-10-11"
   s.description = "NoSQL-like key value stores in SQL-backed ActiveRecord objects. Arbitrary keys behave like dynamic, indexable, searchable first-order attributes."
   s.email = "engineering@awexomelabs.com"
   s.extra_rdoc_files = [
@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
     "README.rdoc"
   ]
   s.files = [
+    ".rspec",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
@@ -25,9 +26,18 @@ Gem::Specification.new do |s|
     "VERSION",
     "doeskeyvalue.gemspec",
     "lib/doeskeyvalue.rb",
+    "lib/doeskeyvalue/accessors.rb",
     "lib/doeskeyvalue/column_storage.rb",
+    "lib/doeskeyvalue/configuration.rb",
+    "lib/doeskeyvalue/index.rb",
     "lib/doeskeyvalue/state.rb",
-    "lib/doeskeyvalue/table_storage.rb"
+    "lib/doeskeyvalue/table_storage.rb",
+    "lib/doeskeyvalue/util.rb",
+    "lib/generators/doeskeyvalue/doeskeyvalue_generator.rb",
+    "lib/generators/doeskeyvalue/templates/create_key_value_index.rb",
+    "spec/doeskeyvalue/column_storage_spec.rb",
+    "spec/doeskeyvalue/table_storage_spec.rb",
+    "spec/spec_helper.rb"
   ]
   s.homepage = "http://github.com/awexome/doeskeyvalue"
   s.licenses = ["MIT"]
@@ -39,21 +49,33 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<activesupport>, ["~> 3.2.0"])
+      s.add_runtime_dependency(%q<activerecord>, ["~> 3.2.0"])
       s.add_runtime_dependency(%q<hashie>, ["~> 1.2.0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.1.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
+      s.add_development_dependency(%q<rspec>, [">= 2.11.0"])
+      s.add_development_dependency(%q<sqlite3>, [">= 1.3.6"])
     else
+      s.add_dependency(%q<activesupport>, ["~> 3.2.0"])
+      s.add_dependency(%q<activerecord>, ["~> 3.2.0"])
       s.add_dependency(%q<hashie>, ["~> 1.2.0"])
       s.add_dependency(%q<bundler>, ["~> 1.1.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
+      s.add_dependency(%q<rspec>, [">= 2.11.0"])
+      s.add_dependency(%q<sqlite3>, [">= 1.3.6"])
     end
   else
+    s.add_dependency(%q<activesupport>, ["~> 3.2.0"])
+    s.add_dependency(%q<activerecord>, ["~> 3.2.0"])
     s.add_dependency(%q<hashie>, ["~> 1.2.0"])
     s.add_dependency(%q<bundler>, ["~> 1.1.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
+    s.add_dependency(%q<rspec>, [">= 2.11.0"])
+    s.add_dependency(%q<sqlite3>, [">= 1.3.6"])
   end
 end
 
