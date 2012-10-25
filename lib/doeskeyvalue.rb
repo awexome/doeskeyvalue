@@ -11,14 +11,14 @@ require "doeskeyvalue/state"
 require "doeskeyvalue/util"
 require "doeskeyvalue/index"
 require "doeskeyvalue/accessors"
-require "doeskeyvalue/column_storage"
-require "doeskeyvalue/table_storage"
+# require "doeskeyvalue/column_storage"   # <= Deprecating in favor of combined Accessors
+# require "doeskeyvalue/table_storage"    # <= Deprecating in favor of combined Accessors
 
 module DoesKeyValue
 
   # Return the current working version from VERSION file:
   def self.version
-    @@version ||= File.open(File.join(File.dirname(__FILE__), "..", "VERSION"), "r").read.strip
+    Gem.loaded_specs["doeskeyvalue"].version.to_s
   end
 
   # Log messages
