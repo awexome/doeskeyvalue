@@ -8,7 +8,7 @@
 ActiveRecord::Base.connection.drop_table(:posts) if ActiveRecord::Base.connection.table_exists?(:posts)
 ActiveRecord::Base.connection.create_table(:posts) do |t|
   t.integer :user_id
-  t.string :title  
+  t.string :title
   t.text :body
   t.timestamps
 end
@@ -86,35 +86,34 @@ describe "table_storage" do
     @post.string_key.should == "Ron Swanson"
   end
 
-  it "sets a string value when assigned" do 
+  it "sets a string value when assigned" do
     @post.string_key = "Hello"
     @post.string_key.should == "Hello"
   end
 
-  it "sets an integer value when assigned" do 
+  it "sets an integer value when assigned" do
     @post.integer_key = 123
     @post.integer_key.should == 123
     @post.integer_key.class.should == Fixnum
   end
-  
-  it "sets a decimal value when assigned" do 
+
+  it "sets a decimal value when assigned" do
     @post.decimal_key = 12.21
     @post.decimal_key.should == 12.21
-    @post.decimal_key.class.should == Float
+    # DB implementation dependent: @post.decimal_key.class.should == Float
   end
-  
-  it "sets a boolean value when assigned" do 
+
+  it "sets a boolean value when assigned" do
     @post.bool_key = true
     @post.bool_key.should be_true
     @post.bool_key = false
     @post.bool_key.should be_false
   end
 
-  it "sets a datetime value when assigned" do 
-    d0 = DateTime.now
+  it "sets a datetime value when assigned" do
+    d0 = Time.now
     @post.date_key = d0
     @post.date_key.should == d0
-    @post.date_key.class.should == DateTime
   end
 
   it "defines with_ scope for indexed keys" do
@@ -130,8 +129,8 @@ describe "table_storage" do
   it "finds objects via the scope and index" do
     @post.string_key = "Champion"
     @post.save
-    find_results = User.with_string_key("Champion")
-    find_results.length.should == 1
+    find_results = Post.with_string_key("Champion")
+    find_results.count.should == 1
     find_results.first.should == @post
   end
 

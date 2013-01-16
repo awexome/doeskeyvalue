@@ -7,7 +7,7 @@ require File.expand_path(File.dirname(__FILE__)+"/../spec_helper")
 # Create schema for sample User model for testing column-based storage:
 ActiveRecord::Base.connection.drop_table(:users) if ActiveRecord::Base.connection.table_exists?(:users)
 ActiveRecord::Base.connection.create_table(:users) do |t|
-  t.string :name  
+  t.string :name
   t.string :email
   t.text :settings
   t.timestamps
@@ -42,6 +42,8 @@ class User < ActiveRecord::Base
   has_key :bool_key, :type=>:boolean
   has_key :date_key, :type=>:datetime
   has_key :default_val_key, :default=>"The Default"
+  has_key :default_val_key_bool_true, :type=>:boolean, :default=>true
+  has_key :default_val_key_bool_false, :type=>:boolean, :default=>false
   has_key :indexless_key, :index=>false
 end
 
@@ -78,6 +80,11 @@ describe "column_storage" do
     @user.default_val_key.should == "The Default"
   end
 
+  it "returns default value for boolean keys" do
+    @user.default_val_key_bool_true.should be_true
+    @user.default_val_key_bool_false.should be_false
+  end
+
   it "saves and returns the same value for keys" do
     @user.string_key = "Ron Swanson"
     @user.save
@@ -85,31 +92,31 @@ describe "column_storage" do
     @user.string_key.should == "Ron Swanson"
   end
 
-  it "sets a string value when assigned" do 
+  it "sets a string value when assigned" do
     @user.string_key = "Hello"
     @user.string_key.should == "Hello"
   end
 
-  it "sets an integer value when assigned" do 
+  it "sets an integer value when assigned" do
     @user.integer_key = 123
     @user.integer_key.should == 123
     @user.integer_key.class.should == Fixnum
   end
-  
-  it "sets a decimal value when assigned" do 
+
+  it "sets a decimal value when assigned" do
     @user.decimal_key = 12.21
     @user.decimal_key.should == 12.21
     @user.decimal_key.class.should == Float
   end
-  
-  it "sets a boolean value when assigned" do 
+
+  it "sets a boolean value when assigned" do
     @user.bool_key = true
     @user.bool_key.should be_true
     @user.bool_key = false
     @user.bool_key.should be_false
   end
 
-  it "sets a datetime value when assigned" do 
+  it "sets a datetime value when assigned" do
     d0 = DateTime.now
     @user.date_key = d0
     @user.date_key.should == d0
