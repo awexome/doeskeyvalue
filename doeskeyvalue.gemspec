@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Awexome Labs"]
-  s.date = "2012-10-11"
+  s.date = "2012-12-30"
   s.description = "NoSQL-like key value stores in SQL-backed ActiveRecord objects. Arbitrary keys behave like dynamic, indexable, searchable first-order attributes."
   s.email = "engineering@awexomelabs.com"
   s.extra_rdoc_files = [
@@ -42,7 +42,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/awexome/doeskeyvalue"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.17"
+  s.rubygems_version = "1.8.24"
   s.summary = "NoSQL-like key value stores in SQL-backed ActiveRecord objects."
 
   if s.respond_to? :specification_version then
