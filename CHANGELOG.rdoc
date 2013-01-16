@@ -1,0 +1,17 @@
+= DoesKeyValue Change Log
+
+=== v0.9.1
+
+Jan 16 2013
+
+Fix issue with causing boolean default values to fail. We now check explicitly for
+nil returns before returning default value on all key types.
+
+Fixes to spec.
+
+
+=== v0.9.0 - Prerelease
+
+Dec 2012
+
+Introduce new API, column or table storage selection, complete rewrite of library.

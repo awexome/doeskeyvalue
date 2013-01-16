@@ -45,7 +45,7 @@ module DoesKeyValue
 
         value = blob.send(key_name)
 
-        return value if value
+        return value unless value.nil?
         return key_default_value
       end
 
@@ -69,11 +69,11 @@ module DoesKeyValue
       if key_indexed
 
         # With scope:
-        scope "with_#{key_name}", lambda {|value| 
+        scope "with_#{key_name}", lambda {|value|
           DoesKeyValue::Index.find_objects(self, key_name, value)
         }
         DoesKeyValue.log("Scope with_#{key_name} added for indexed key #{key_name}")
-      
+
         # Update the index after save:
         if column_storage?
           define_method("update_index_for_#{key_name}") do
@@ -124,7 +124,7 @@ module DoesKeyValue
       DoesKeyValue::State.instance.options_for_key(self, key_name)
     end
 
-    
+
     private
 
     # Define a new key for a class:
